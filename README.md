@@ -207,3 +207,5 @@ MIT License - см. файл [LICENSE](LICENSE)
 - Графический интерфейс на Tkinter
 - Логирование в JSON
 - Сборка в .exe
+#   M a i l C h e q u e  
+ 
