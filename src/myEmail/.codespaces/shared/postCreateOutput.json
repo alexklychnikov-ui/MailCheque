@@ -1,0 +1,16 @@
+{
+  "steps": [
+    {
+      "name": "Finishing up...",
+      "status": "succeeded",
+      "description": null,
+      "stepDetail": null
+    },
+    {
+      "name": "Done",
+      "status": "succeeded",
+      "description": null,
+      "stepDetail": null
+    }
+  ]
+}

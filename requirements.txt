@@ -1,0 +1,23 @@
+# Основные зависимости для MailCheque
+
+# Для работы с датами и временем
+python-dateutil>=2.8.2
+
+# Для шифрования паролей
+cryptography>=41.0.0
+
+# Для тестирования
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Для сборки в .exe
+pyinstaller>=5.0.0
+
+# Дополнительные утилиты для разработки
+Pillow>=9.0.0
+
+# Примечание: большинство библиотек встроены в Python:
+# - tkinter (GUI)
+# - imaplib, email, ssl (почта)
+# - json, datetime, re, threading, tempfile, os, sys
+# - pathlib, typing, dataclasses, unittest
