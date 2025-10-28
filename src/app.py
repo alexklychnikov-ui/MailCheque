@@ -72,12 +72,34 @@ class MailChequeApp:
                 # Получаем письма из нескольких папок (Mail.ru автосортирует чеки)
                 folders_to_check = [self.config.folder]
                 
-                # Для Mail.ru добавляем специальную папку для чеков
+                # Для Mail.ru: пробуем разные варианты системных папок чеков/покупок
                 if 'mail.ru' in self.config.imap_server.lower():
+                    candidate_names = [
+                        'Receipts', 'receipts',
+                        'Purchases', 'Bills', 'Invoices',
+                        'Чеки', 'Чек', 'Покупки', 'Покупки и чеки',
+                        'Счета и чеки', 'Оплата', 'Платежи', 'Платежи и переводы'
+                    ]
+                    delimiters = ['/', '.']
+                    for name in candidate_names:
+                        # Корневые варианты
+                        folders_to_check.append(name)
+                        # Варианты под INBOX с различными разделителями
+                        for delim in delimiters:
+                            folders_to_check.append(f'INBOX{delim}{name}')
+                    # Классический вариант на англ.
                     folders_to_check.append('INBOX/Receipts')
                 
+                # Дедупликация с сохранением порядка
+                seen_folders = set()
+                unique_folders = []
+                for f in folders_to_check:
+                    if f and f not in seen_folders:
+                        seen_folders.add(f)
+                        unique_folders.append(f)
+
                 all_emails = []
-                for folder in folders_to_check:
+                for folder in unique_folders:
                     try:
                         folder_emails = client.search_receipt_emails(
                             self.config.start_date,
