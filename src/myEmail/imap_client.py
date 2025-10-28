@@ -48,7 +48,12 @@ class IMAPClient:
             return True
             
         except imaplib.IMAP4.error as e:
-            raise Exception(f"Ошибка аутентификации: {e}")
+            error_msg = str(e).lower()
+            # Специальная обработка для Mail.ru - требуется пароль приложения
+            # Показываем инструкцию только если Mail.ru явно требует application password
+            if ('application password' in error_msg or 'parol prilozheni' in error_msg):
+                raise Exception("Mail.ru требует ПАРОЛЬ ПРИЛОЖЕНИЯ (не основной пароль!)")
+            raise Exception(f"Ошибка аутентификации: {e}\n\nПроверьте:\n- Правильность email и пароля\n- Для Mail.ru используйте пароль приложения")
         except ConnectionError as e:
             raise Exception(f"Ошибка подключения к серверу: {e}")
         except Exception as e:

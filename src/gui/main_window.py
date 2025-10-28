@@ -394,8 +394,78 @@ class MainWindow:
         self.summary_var.set(f"Найдено чеков: {count}, Общая сумма: {total_amount:.2f} ₽")
         
     def show_error(self, message: str):
-        messagebox.showerror("Ошибка", message)
+        # Если это ошибка аутентификации Mail.ru - показываем специальное окно
+        if "Mail.ru требует ПАРОЛЬ ПРИЛОЖЕНИЯ" in message:
+            self._show_mailru_auth_error()
+        else:
+            messagebox.showerror("Ошибка", message)
         self.set_status("Ошибка выполнения запроса")
+    
+    def _show_mailru_auth_error(self):
+        """Показать специальное окно для ошибки аутентификации Mail.ru"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Ошибка аутентификации Mail.ru")
+        dialog.geometry("550x420")
+        dialog.resizable(False, False)
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        # Центрируем окно
+        dialog.update_idletasks()
+        x = (dialog.winfo_screenwidth() // 2) - (550 // 2)
+        y = (dialog.winfo_screenheight() // 2) - (420 // 2)
+        dialog.geometry(f"550x420+{x}+{y}")
+        
+        main_frame = ttk.Frame(dialog, padding="15")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Заголовок
+        title_label = ttk.Label(main_frame, text="❌ Ошибка аутентификации Mail.ru", 
+                               font=('TkDefaultFont', 11, 'bold'))
+        title_label.pack(pady=(0, 10))
+        
+        # Основное сообщение
+        msg_label = ttk.Label(main_frame, 
+                             text="Mail.ru требует ПАРОЛЬ ПРИЛОЖЕНИЯ\n(не основной пароль!)",
+                             font=('TkDefaultFont', 10))
+        msg_label.pack(pady=(0, 15))
+        
+        # Инструкция
+        instruction_frame = ttk.LabelFrame(main_frame, text="Как создать пароль приложения:", padding="10")
+        instruction_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        
+        instructions = [
+            "1. Откройте в браузере:",
+            "   https://account.mail.ru/user/2-step-auth/passwords/",
+            "",
+            "2. Войдите в свой аккаунт Mail.ru",
+            "",
+            "3. Нажмите 'Создать пароль для приложения'",
+            "",
+            "4. Введите название: MailCheque",
+            "",
+            "5. Скопируйте полученный пароль (16 символов)",
+            "",
+            "6. Используйте этот пароль в настройках MailCheque"
+        ]
+        
+        text_widget = tk.Text(instruction_frame, height=13, width=60, wrap=tk.WORD,
+                             font=('TkDefaultFont', 9), relief=tk.FLAT, bg='#f0f0f0')
+        text_widget.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        text_widget.insert('1.0', '\n'.join(instructions))
+        text_widget.config(state=tk.DISABLED)
+        
+        # Примечание
+        note_label = ttk.Label(main_frame, 
+                              text="📖 Подробная инструкция: MAILRU_SETUP.md",
+                              font=('TkDefaultFont', 8))
+        note_label.pack(pady=(5, 10))
+        
+        # Кнопка OK
+        ok_btn = ttk.Button(main_frame, text="OK", command=dialog.destroy, width=10)
+        ok_btn.pack()
+        
+        dialog.wait_window()
         
     def show_info(self, message: str):
         messagebox.showinfo("Информация", message)
