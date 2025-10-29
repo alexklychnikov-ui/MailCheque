@@ -42,18 +42,34 @@ class IMAPClient:
             # Подключаемся к серверу
             self.connection = imaplib.IMAP4_SSL(self.server, self.port, ssl_context=context)
             
-            # Логинимся
-            self.connection.login(email, password)
+            # Логинимся (убираем лишние пробелы)
+            clean_email = email.strip()
+            clean_password = password.strip()
+            self.connection.login(clean_email, clean_password)
             self._connected = True
             return True
             
         except imaplib.IMAP4.error as e:
-            error_msg = str(e).lower()
-            # Специальная обработка для Mail.ru - требуется пароль приложения
-            # Показываем инструкцию только если Mail.ru явно требует application password
-            if ('application password' in error_msg or 'parol prilozheni' in error_msg):
-                raise Exception("Mail.ru требует ПАРОЛЬ ПРИЛОЖЕНИЯ (не основной пароль!)")
-            raise Exception(f"Ошибка аутентификации: {e}\n\nПроверьте:\n- Правильность email и пароля\n- Для Mail.ru используйте пароль приложения")
+            error_msg = str(e)
+            # Для Mail.ru добавляем подсказку о пароле приложения
+            if 'mail.ru' in self.server.lower():
+                # Добавляем информацию о используемых параметрах (без пароля!)
+                password_len = len(password.strip())
+                raise Exception(
+                    f"Ошибка аутентификации Mail.ru\n\n"
+                    f"Используемые параметры:\n"
+                    f"• Сервер: {self.server}:{self.port}\n"
+                    f"• Email: {email.strip()}\n"
+                    f"• Длина пароля: {password_len} символов\n\n"
+                    f"Проверьте:\n"
+                    f"✓ Email ПОЛНОСТЬЮ: логин@mail.ru (не просто 'логин')\n"
+                    f"✓ Пароль приложения: должен быть 16 символов\n"
+                    f"✓ IMAP включен: mail.ru → Настройки → Почтовые программы\n"
+                    f"✓ Используется пароль ПРИЛОЖЕНИЯ, не основной\n\n"
+                    f"Создать пароль: https://account.mail.ru/user/2-step-auth/passwords/\n\n"
+                    f"Ошибка сервера: {error_msg}"
+                )
+            raise Exception(f"Ошибка аутентификации: {error_msg}\n\nПроверьте правильность email и пароля.")
         except ConnectionError as e:
             raise Exception(f"Ошибка подключения к серверу: {e}")
         except Exception as e:
